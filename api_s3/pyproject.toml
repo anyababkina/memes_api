@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "api-s3"
+version = "0.1.0"
+description = ""
+authors = ["annbabkina <aa.babkina16@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+boto3 = "^1.34.149"
+loguru = "^0.7.2"
+pydantic-settings = "^2.3.4"
+fastapi = "^0.111.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  api_web:
+    build: ./api_memes
+    container_name: api_web
+    env_file:
+      - ./api_memes/.env
+    ports:
+      - "${API_MEMES_PORT}:${API_MEMES_PORT}"
+    volumes:
+      - .:/api_web
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - service
+
+  s3_web:
+    build: ./api_s3
+    container_name: s3_web
+    env_file:
+      - ./api_s3/.env
+    ports:
+      - "${S3_API_PORT}:${S3_API_PORT}"
+    volumes:
+      - .:/api_s3
+    depends_on:
+      - db
+      - api_web
+      - minio
+    networks:
+      - service
+
+  minio:
+    image: minio/minio
+    container_name: s3
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+    command: server /data
+    networks:
+      - service
+
+  db:
+    restart: always
+    image: postgres:15
+    container_name: db
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - "5434:5432"
+    networks:
+      - service
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d memes_db -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pg_data:
+  minio_data:
+
+networks:
+  service:
+    driver: bridge
